@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"net/http"
 	"time"
+	"github.com/herodragmon/chirpy/internal/database"
 )
 
 func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Password         string `json:"password"`
 		Email            string `json:"email"`
-		ExpiresInSeconds int `json:"expires_in_seconds"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -35,27 +35,41 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	expirationTime := time.Hour
-	if params.ExpiresInSeconds > 0 && params.ExpiresInSeconds < 3600 {
-		expirationTime = time.Duration(params.ExpiresInSeconds) * time.Second
-	}
-
-	jwt, err := auth.MakeJWT(user.ID, cfg.jwtSecret, expirationTime)
+	
+	accessToken, err := auth.MakeJWT(user.ID, cfg.jwtSecret, expirationTime)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't make jwt", err)
 		return
 	}
 	type response struct {
     User
-    Token string `json:"token"`
+    Token        string `json:"token"`
+		RefreshToken string `json:"refresh_token"`
+	}
+	
+	refreshToken := auth.MakeRefreshToken()
+
+	expiresAt := time.Now().Add(60 * 24 * time.Hour)
+
+	_, err = cfg.db.CreateRefreshTokens(r.Context(), database.CreateRefreshTokensParams{
+		Token:     refreshToken,
+		UserID:    user.ID,
+		ExpiresAt: expiresAt,
+	})
+
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Couldn't create refresh token", err)
+		return
 	}
 
 	respondWithJSON(w, http.StatusOK, response{
 		User: User{
-			ID:        user.ID,
-			Email:     user.Email,
-			CreatedAt: user.CreatedAt,
-			UpdatedAt: user.UpdatedAt,
+			ID:         user.ID,
+			Email:      user.Email,
+			CreatedAt:  user.CreatedAt,
+			UpdatedAt:  user.UpdatedAt,
 		},
-		Token:       jwt,
+		Token:        accessToken,
+		RefreshToken: refreshToken,
 	})
 }

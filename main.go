@@ -53,24 +53,18 @@ func main() {
 	}
 
 	fsHandler := http.FileServer(http.Dir(filepathRoot))
-
 	wrapped := (&cfg).middlewareMetricsInc(fsHandler)
 
 	mux.Handle("/app/", http.StripPrefix("/app/", wrapped))
-
 	mux.HandleFunc("GET /admin/metrics", cfg.handlerMetrics)
-
 	mux.HandleFunc("POST /admin/reset", cfg.handlerReset)
-
 	mux.HandleFunc("POST /api/users", cfg.handlerUsersCreate)
-
 	mux.HandleFunc("POST /api/chirps", cfg.handlerChirpsCreate)
-
 	mux.HandleFunc("GET /api/chirps", cfg.handlerChirpsGet)
-
 	mux.HandleFunc("GET /api/chirps/{chirpID}", cfg.handlerChirpsGetByID)
-
 	mux.HandleFunc("POST /api/login", cfg.handlerLogin)
+	mux.HandleFunc("POST /api/refresh", cfg.handlerRefresh)
+	mux.HandleFunc("POST /api/revoke", cfg.handlerRevoke)
 
 
 	server := &http.Server{
