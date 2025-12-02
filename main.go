@@ -24,6 +24,7 @@ type User struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Email     string    `json:"email"`
+	Password  string    `json:"-"`
 }
 
 func main() {
@@ -58,9 +59,15 @@ func main() {
 
 	mux.HandleFunc("POST /admin/reset", cfg.handlerReset)
 
-	mux.HandleFunc("POST /api/validate_chirp", handlerChirpsValidate)
-
 	mux.HandleFunc("POST /api/users", cfg.handlerUsersCreate)
+
+	mux.HandleFunc("POST /api/chirps", cfg.handlerChirpsCreate)
+
+	mux.HandleFunc("GET /api/chirps", cfg.handlerChirpsGet)
+
+	mux.HandleFunc("GET /api/chirps/{chirpID}", cfg.handlerChirpsGetByID)
+
+	mux.HandleFunc("POST /api/login", cfg.handlerLogin)
 
 
 	server := &http.Server{

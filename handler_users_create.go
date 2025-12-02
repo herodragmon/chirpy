@@ -3,10 +3,13 @@ package main
 import (
 	"net/http"
 	"encoding/json"
+	"github.com/herodragmon/chirpy/internal/auth"
+	"github.com/herodragmon/chirpy/internal/database"
 )
 
 func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 	type request struct {
+		Password string `json:"password"`
 		Email string `json:"email"`
 	}
 	decoder := json.NewDecoder(r.Body)
@@ -17,12 +20,22 @@ func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	user, err := cfg.db.CreateUser(r.Context(), params.Email)
+	hashedPassword, err := auth.HashPassword(params.Password)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Couldn't hash password", err)
+		return
+	}
+	
+	user, err := cfg.db.CreateUser(r.Context(), database.CreateUserParams{
+    Email:          params.Email,
+    HashedPassword: hashedPassword,
+	})
+
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Error creating user", err)
 		return
 	}
-	
+
 	respondWithJSON(w, http.StatusCreated, User{
 		ID: user.ID,
 		CreatedAt: user.CreatedAt,
