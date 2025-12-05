@@ -18,20 +18,23 @@ type apiConfig struct {
 	db  *database.Queries
 	platform string
 	jwtSecret string
+	apiPolkaKey string
 }
 
 type User struct {
-	ID        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Email     string    `json:"email"`
-	Password  string    `json:"-"`
+	ID          uuid.UUID `json:"id"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	Email       string    `json:"email"`
+	Password    string    `json:"-"`
+	IsChirpyRed bool      `json:"is_chirpy_red"`
 }
 
 func main() {
 	godotenv.Load()
 	platform := os.Getenv("PLATFORM")
 	secretKey := os.Getenv("SECRET_KEY")
+	polkaKey := os.Getenv("POLKA_KEY")
 	dbURL := os.Getenv("DB_URL")
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
@@ -50,6 +53,7 @@ func main() {
 		db: dbQueries,
 		platform: platform,
 		jwtSecret: secretKey,
+		apiPolkaKey:  polkaKey,
 	}
 
 	fsHandler := http.FileServer(http.Dir(filepathRoot))
@@ -65,6 +69,9 @@ func main() {
 	mux.HandleFunc("POST /api/login", cfg.handlerLogin)
 	mux.HandleFunc("POST /api/refresh", cfg.handlerRefresh)
 	mux.HandleFunc("POST /api/revoke", cfg.handlerRevoke)
+	mux.HandleFunc("PUT /api/users", cfg.handlerUsersUpdate)
+	mux.HandleFunc("DELETE /api/chirps/{chirpID}", cfg.handlerChirpsDeleteByID)
+	mux.HandleFunc("POST /api/polka/webhooks", cfg.handlerWebHooks)
 
 
 	server := &http.Server{
