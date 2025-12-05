@@ -33,33 +33,68 @@ Create a `.env` or export variables:
 
 ``
 DATABASE_URL=postgres://user:pass@localhost:5432/chirpy?sslmode=disable
-PORT=8080
 PLATFORM = "dev"
 JWT_SECRET=your_jwt_secret_here
 POKA_KEY = your polka key
 ``
-
-
 ## API Overview
-### Auth
-- `POST /login` — returns access + refresh tokens  
-- `POST /refresh` — returns new access token  
-- `POST /users` — create a new user  
-- `PUT /users/{id}` — update user  
+
+### Authentication
+- **POST /api/users**  
+  Create a new user account.
+
+- **POST /api/login**  
+  Log in with email + password.  
+  Returns: `access_token` and `refresh_token`.
+
+- **POST /api/refresh**  
+  Exchange a valid refresh token for a new access token.
+
+- **POST /api/revoke**  
+  Revoke a refresh token (logout everywhere).
+
+- **PUT /api/users**  
+  Update the authenticated user's data.
+
+---
 
 ### Chirps
-- `GET /chirps` — list chirps  
-- `POST /chirps` — create chirp  
-- `DELETE /chirps/{id}` — delete chirp  
+- **GET /api/chirps**  
+  List all chirps. Supports optional query params:  
+  - `author_id`  
+  - `sort` (if implemented)
 
-### System
-- `GET /ready` — readiness probe  
-- `/metrics` — Prometheus metrics  
+- **POST /api/chirps**  
+  Create a new chirp (requires access token).
+
+- **GET /api/chirps/{chirpID}**  
+  Get a single chirp by ID.
+
+- **DELETE /api/chirps/{chirpID}**  
+  Delete a chirp by ID (owner-only, authenticated).
+
+---
+
+### Webhooks
+- **POST /api/polka/webhooks**  
+  Handle incoming Polka webhook events.
+
+---
+
+### Admin / System
+- **GET /admin/metrics**  
+  Prometheus metrics endpoint.
+
+- **POST /admin/reset**  
+  Reset database (enabled only when `PLATFORM=dev`).
+
+- **GET /ready**  
+  Readiness probe for health checks.
 
 ## Development Notes
 - Uses **sqlc** for DB queries.
 - Handlers are simple Go functions using standard `net/http`.
-- Delete & create routes require authentication.
+- Creating, deleting, and updating resources require authentication.
 
 ## License
 Open-source. Modify and use freely.
