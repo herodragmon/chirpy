@@ -1,8 +1,8 @@
-# 🐦 Chirpy Microservice Documentation
+# Chirpy Microservice Documentation
 
 Chirpy is a small **Go-based microservice** that lets users register, authenticate, and create short messages called "chirps."
 
-## ✨ Key Features
+## Key Features
 
 * **Authentication:** Access and refresh token authentication using a **JWT Secret**. Passwords are **hashed**.
 * **CRUD Operations:** Full Create, Read, Update, and Delete support for users and chirps.
@@ -13,7 +13,7 @@ Chirpy is a small **Go-based microservice** that lets users register, authentica
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 The service runs on **`http://localhost:8080`** by default.
 
@@ -32,7 +32,7 @@ The service runs on **`http://localhost:8080`** by default.
     go run .
     ```
 
-### ⚙️ Environment Variables
+### Environment Variables
 
 Ensure these variables are set in a `.env` file or exported:
 
@@ -43,13 +43,13 @@ JWT_SECRET=your_jwt_secret_here
 POKA_KEY = your polka key
 ```
 
-## 🐦 API Overview
+## API Overview
 
 **Base URL:** `http://localhost:8080`
 
 ---
 
-### 🛠️ Admin & System Endpoints
+### Admin & System Endpoints
 
 | Method | Path | Description | Authentication | Request Body | Response Status & Body |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -59,7 +59,7 @@ POKA_KEY = your polka key
 
 ---
 
-### 👤 Users & Authentication Endpoints
+### Users & Authentication Endpoints
 
 | Method | Path | Description | Authentication | Request Body | Response Status & Body |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -71,7 +71,7 @@ POKA_KEY = your polka key
 
 ---
 
-### 💬 Chirps Endpoints
+### Chirps Endpoints
 
 | Method | Path | Description | Authentication | Request Body | Response Status & Body |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -84,7 +84,7 @@ POKA_KEY = your polka key
 
 ---
 
-### 🔗 Webhooks Endpoints
+### Webhooks Endpoints
 
 | Method | Path | Description | Authentication | Request Body | Response Status & Body |
 | :--- | :--- | :--- | :--- | :--- | :--- |
