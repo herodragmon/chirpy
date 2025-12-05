@@ -1,4 +1,4 @@
-# Chirpy Microservice Documentation
+# Chirpy Microservice
 
 Chirpy is a small **Go-based microservice** that lets users register, authenticate, and create short messages called "chirps."
 
