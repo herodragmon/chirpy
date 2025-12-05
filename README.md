@@ -32,8 +32,7 @@ This repo implements a minimal backend service that supports user registration/l
 ### Prerequisites
 
 * Go 1.20+ installed
-* Git
-* (Optional) Docker & Docker Compose if you prefer containerized runs
+* Postgres
 
 ### Clone & build
 
@@ -56,26 +55,6 @@ export PORT=8080
 export PLATFORM=dev            # set to "dev" to enable admin endpoints locally
 export SECRET_KEY="<your-jwt-secret>"
 export POLKA_KEY="<your-polka-webhook-key>"  # used to validate incoming webhooks
-```
-
----
-
-## Running with Docker (optional)
-
-You can containerize the app by creating a simple `Dockerfile` and `docker-compose.yml`. Example `docker-compose.yml` snippet:
-
-```yaml
-version: '3.8'
-services:
-  chirpy:
-    build: .
-    ports:
-      - "8080:8080"
-    environment:
-      - PORT=8080
-      - DATABASE_URL=sqlite3:///data/chirpy.db
-    volumes:
-      - ./data:/data
 ```
 
 ---
