@@ -39,57 +39,73 @@ POKA_KEY = your polka key
 ``
 ## API Overview
 
-### Authentication
-- **POST /api/users**  
-  Create a new user account.
+Base URL: http://localhost:8080
 
-- **POST /api/login**  
-  Log in with email + password.  
-  Returns: `access_token` and `refresh_token`.
+### Admin
+POST /admin/reset  
+- Reset the database (dev only).  
+- Returns: 200
 
-- **POST /api/refresh**  
-  Exchange a valid refresh token for a new access token.
+### Users & Auth
+POST /api/users  
+- Create a new user.  
+- Body: { "email": "...", "password": "..." }  
+- Returns: 201 + { id, email }
 
-- **POST /api/revoke**  
-  Revoke a refresh token (logout everywhere).
+POST /api/login  
+- Log in user.  
+- Body: { "email": "...", "password": "..." }  
+- Returns: 200 + { token, email }
 
-- **PUT /api/users**  
-  Update the authenticated user's data.
+POST /api/refresh  
+- Exchange refresh token for new token.  
+- Body: { "token": "<refresh-token>" }  
+- Returns: 200 + { token }
 
----
+POST /api/revoke  
+- Revoke a refresh token.  
+- Body: { "token": "<refresh-token>" }  
+- Returns: 200
+
+PUT /api/users  
+- Update authenticated user.  
+- Auth: Bearer <token>  
+- Returns: 200 + updated user
 
 ### Chirps
-- **GET /api/chirps**  
-  List all chirps. Supports optional query params:  
-  - `author_id`  
-  - `sort` (if implemented)
+POST /api/chirps  
+- Create chirp.  
+- Auth: Bearer <token>  
+- Body: { "body": "text" }  
+- Returns: 201 + created chirp
 
-- **POST /api/chirps**  
-  Create a new chirp (requires access token).
+GET /api/chirps  
+- List chirps.  
+- Query: author_id=<userID>  
+- Returns: 200 + list of chirps
 
-- **GET /api/chirps/{chirpID}**  
-  Get a single chirp by ID.
+GET /api/chirps/{chirpID}  
+- Get single chirp.  
+- Returns: 200 or 404
 
-- **DELETE /api/chirps/{chirpID}**  
-  Delete a chirp by ID (owner-only, authenticated).
-
----
+DELETE /api/chirps/{chirpID}  
+- Delete chirp.  
+- Auth: Bearer <token>  
+- Returns: 204 or 403 or 404
 
 ### Webhooks
-- **POST /api/polka/webhooks**  
-  Handle incoming Polka webhook events.
+POST /api/polka/webhooks  
+- Handle Polka webhook events.  
+- Returns: 200
 
----
+### System
+GET /ready  
+- Readiness probe.  
+- Returns: 200
 
-### Admin / System
-- **GET /admin/metrics**  
-  Prometheus metrics endpoint.
-
-- **POST /admin/reset**  
-  Reset database (enabled only when `PLATFORM=dev`).
-
-- **GET /ready**  
-  Readiness probe for health checks.
+GET /admin/metrics  
+- Prometheus metrics.  
+- Returns: 200
 
 ## Development Notes
 - Uses **sqlc** for DB queries.
