@@ -87,7 +87,7 @@ POKA_KEY = your polka key
 
 | Method | Path | Description | Authentication | Request Body | Response Status & Body |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **POST** | `/api/polka/webhooks` | Handle Polka webhook events. | None | Webhook payload | `200` |
+| **POST** | `/api/polka/webhooks` | Handle Polka webhook events. | `ApiKey <polka key>` | Webhook payload | `200` |
 
 ---
 
