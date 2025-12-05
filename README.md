@@ -19,8 +19,8 @@ This repo implements a minimal backend service that supports user registration/l
 ## Tech stack
 
 * Go (Golang)
-* net/http or a lightweight router (mux/chi depending on repo)
-* SQL database (SQLite/Postgres)
+* net/http
+* SQL database (Postgres)
 * JSON-based REST API
 
 ---
@@ -196,13 +196,6 @@ goose -dir sql/schema postgres "$DB_URL" status
 
 Admin routes such as `/admin/metrics` and `/admin/reset` are only enabled when the `PLATFORM` env var equals `dev`. This prevents accidental exposure of admin capabilities in production.
 
-Example:
-
-```bash
-export PLATFORM=dev  # enables admin endpoints
-# then run the app
-```
-
 If `PLATFORM` is not `dev`, admin endpoints will reject requests / not be registered.
 
 ---
@@ -228,7 +221,7 @@ Make sure to keep `POLKA_KEY` private and do not commit it to the repository.
 
 ## Tests
 
-If the project includes tests, run them like this:
+For running auth tests:
 
 ```bash
 go test ./...
@@ -236,25 +229,4 @@ go test ./...
 
 Add unit and integration tests for handlers, DB access, and auth flows as you expand the project.
 
----
 
-## Recommended improvements (to make repo stand out)
-
-* Add a polished `README.md` (this file)
-* Add usage examples and example requests/responses
-* Add tests for handlers and database layer
-* Add a Dockerfile and docker-compose for easy local deployment
-* Add CI (GitHub Actions) to run tests on PRs
-* Add basic API documentation (Swagger/OpenAPI or a simple markdown doc)
-
----
-
-## License
-
-Add a LICENSE file (MIT or Apache-2.0 recommended for student projects).
-
----
-
-## Contact
-
-If you'd like changes to this README or want a version tailored with exact commands from your project structure, tell me and I’ll update it to match your code.
