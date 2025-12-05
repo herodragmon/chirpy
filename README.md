@@ -50,9 +50,12 @@ go build ./...
 Create a `.env` or export the following before running (examples):
 
 ```bash
+# Postgres (production / local Postgres)
+export DB_URL="postgres://postgres:postgres@localhost:5432/chirpy?sslmode=disable"
 export PORT=8080
-export DATABASE_URL=sqlite3://./chirpy.db   # or a Postgres URL
-# any other app-specific env variables
+export PLATFORM=dev            # set to "dev" to enable admin endpoints locally
+export SECRET_KEY="<your-jwt-secret>"
+export POLKA_KEY="<your-polka-webhook-key>"  # used to validate incoming webhooks
 ```
 
 ---
@@ -81,19 +84,35 @@ services:
 
 > Replace `:PORT` with your configured port, e.g. `8080`.
 
-### Authentication
+### Users / Authentication
 
-This project may use simple token auth or session cookies. Update these examples to match your implementation.
+* `POST /api/users`
 
-* `POST /api/register`
-
-  * Body: `{ "username": "alice", "password": "secret" }`
+  * Create a new user
+  * Body example: `{ "email": "test@example.com", "password": "secret" }`
   * Response: `201 Created` with user JSON
+
+* `PUT /api/users`
+
+  * Update user email/password (auth required)
+  * Body example: `{ "email": "new@example.com" }`
+  * Response: `200 OK`
 
 * `POST /api/login`
 
-  * Body: `{ "username": "alice", "password": "secret" }`
-  * Response: `200 OK` with token
+  * User login, returns access & refresh tokens
+  * Body: `{ "email": "test@example.com", "password": "secret" }`
+  * Response: `200 OK` with tokens
+
+* `POST /api/refresh`
+
+  * Exchange refresh token for new access token
+  * Response: `200 OK`
+
+* `POST /api/revoke`
+
+  * Revoke refresh token
+  * Response: `200 OK`
 
 ### Chirps (posts)
 
@@ -141,14 +160,69 @@ curl -X POST http://localhost:8080/api/chirps \
 
 ## Database
 
-The project contains SQL schema under the `sql/` folder. By default the app can use SQLite for local dev and Postgres in production — change the `DATABASE_URL` accordingly.
+This project uses **Postgres** in production and can use **SQLite** for quick local development. The SQL schema and migrations live in the `sql/` folder.
 
-If you use SQLite, an example to initialize DB (if the project provides migrations):
+### Migrations (Goose)
+
+This project uses **Goose** for database migrations. Migration files live in the `sql/schema` directory.
+
+#### Running migrations
 
 ```bash
-# run migrations (if you have a migrate tool)
-# migrate -path sql -database "sqlite3://./chirpy.db" up
+# Install Goose
+go install github.com/pressly/goose/v3/cmd/goose@latest
+
+# Run migrations
+goose -dir sql/schema postgres "$DB_URL" up
 ```
+
+To roll back the last migration:
+
+```bash
+goose -dir sql/schema postgres "$DB_URL" down
+```
+
+To view migration status:
+
+```bash
+goose -dir sql/schema postgres "$DB_URL" status
+```
+
+> Note: Goose supports Postgres, SQLite, and others. Since this project uses Postgres in main.go (`sql.Open("postgres", dbURL)`), Goose should be run with the `postgres` driver.
+
+---
+
+## Admin endpoints & platform guard
+
+Admin routes such as `/admin/metrics` and `/admin/reset` are only enabled when the `PLATFORM` env var equals `dev`. This prevents accidental exposure of admin capabilities in production.
+
+Example:
+
+```bash
+export PLATFORM=dev  # enables admin endpoints
+# then run the app
+```
+
+If `PLATFORM` is not `dev`, admin endpoints will reject requests / not be registered.
+
+---
+
+## Webhooks (Polka)
+
+The app exposes a webhook endpoint:
+
+* `POST /api/polka/webhooks`
+
+  * This endpoint expects incoming requests from the Polka service.
+  * The app validates incoming webhook requests using the `POLKA_KEY` env var. Set `POLKA_KEY` to a secret value and provide the same secret to the Polka service so you can verify requests.
+
+Example validation flow (conceptual):
+
+1. Polka sends a POST to `/api/polka/webhooks` with a signature or key in the headers/body.
+2. Your handler compares that value to the `POLKA_KEY` value loaded from env.
+3. If they match, the webhook is accepted and processed; otherwise it is rejected with `401 Unauthorized`.
+
+Make sure to keep `POLKA_KEY` private and do not commit it to the repository.
 
 ---
 
@@ -184,5 +258,3 @@ Add a LICENSE file (MIT or Apache-2.0 recommended for student projects).
 ## Contact
 
 If you'd like changes to this README or want a version tailored with exact commands from your project structure, tell me and I’ll update it to match your code.
-
-
